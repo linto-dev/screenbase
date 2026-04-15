@@ -96,9 +96,9 @@ export const server = await Worker("server", {
     COOKIE_DOMAIN: alchemy.env.COOKIE_DOMAIN!,
     VIDEO_PROCESSING_QUEUE: videoProcessingQueue,
     // AWS Lambda（動画変換処理）
-    LAMBDA_FUNCTION_URL: process.env.LAMBDA_FUNCTION_URL ?? "",
-    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ?? "",
-    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ?? "",
+    LAMBDA_FUNCTION_URL: alchemy.env.LAMBDA_FUNCTION_URL!,
+    AWS_ACCESS_KEY_ID: alchemy.secret.env.AWS_ACCESS_KEY_ID!,
+    AWS_SECRET_ACCESS_KEY: alchemy.secret.env.AWS_SECRET_ACCESS_KEY!,
     SKIP_VIDEO_PROCESSING: process.env.SKIP_VIDEO_PROCESSING ?? (process.env.ALCHEMY_DEPLOY ? "" : "true"),
   },
   eventSources: [
