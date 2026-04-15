@@ -47,6 +47,7 @@ jobs:
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
           BETTER_AUTH_URL: ${{ vars.BETTER_AUTH_URL }}
           NEXT_PUBLIC_SERVER_URL: ${{ vars.NEXT_PUBLIC_SERVER_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
           FROM_EMAIL: ${{ vars.FROM_EMAIL }}
           COOKIE_DOMAIN: ${{ vars.COOKIE_DOMAIN }}
 
