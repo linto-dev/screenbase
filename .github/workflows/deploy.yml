@@ -51,6 +51,7 @@ jobs:
           FROM_EMAIL: ${{ vars.FROM_EMAIL }}
           COOKIE_DOMAIN: ${{ vars.COOKIE_DOMAIN }}
           LAMBDA_FUNCTION_URL: ${{ vars.LAMBDA_FUNCTION_URL }}
+          LAMBDA_REGION: ${{ vars.LAMBDA_REGION }}
 
           # App secrets
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}

@@ -42,6 +42,7 @@
         "RESEND_API_KEY",
         "COOKIE_DOMAIN",
         "LAMBDA_FUNCTION_URL",
+        "LAMBDA_REGION",
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "SKIP_VIDEO_PROCESSING"

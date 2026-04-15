@@ -20,6 +20,8 @@ export default {
     const aws = new AwsClient({
       accessKeyId: env.AWS_ACCESS_KEY_ID,
       secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      service: "lambda",
+      region: env.LAMBDA_REGION,
     });
 
     for (const msg of batch.messages) {
