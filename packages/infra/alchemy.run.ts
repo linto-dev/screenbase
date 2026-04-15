@@ -66,6 +66,7 @@ export const web = await Nextjs("web", {
   domains: ["screenbase.dpdns.org"],
   bindings: {
     NEXT_PUBLIC_SERVER_URL: alchemy.env.NEXT_PUBLIC_SERVER_URL!,
+    NEXT_PUBLIC_APP_URL: alchemy.env.BETTER_AUTH_URL!,
     DB: db,
     CORS_ORIGIN: alchemy.env.CORS_ORIGIN!,
     BETTER_AUTH_SECRET: alchemy.secret.env.BETTER_AUTH_SECRET!,
