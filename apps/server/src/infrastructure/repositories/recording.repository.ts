@@ -59,8 +59,7 @@ export function createRecordingRepository(d1: D1Database) {
      * `since` 指定時は `created_at >= since` で期間を絞り込む。
      *
      * - `count` は全 status を対象
-     * - `totalDurationMs` / `totalFileSize` は `completed` / `processing` のみ対象
-     *   （`uploading` / `failed` はメタデータが欠損/不完全のため除外）
+     * - `totalDurationMs` / `totalFileSize` は `completed` のみ対象（再生可能な動画のみ）
      * - `statusBreakdown` は status 別の件数
      */
     async aggregateByOrganization(params: {
@@ -74,6 +73,7 @@ export function createRecordingRepository(d1: D1Database) {
         uploading: number;
         processing: number;
         completed: number;
+        unoptimized: number;
         failed: number;
       };
     }> {
@@ -87,11 +87,12 @@ export function createRecordingRepository(d1: D1Database) {
       const [row] = await db
         .select({
           count: sql<number>`count(*)`,
-          totalDurationMs: sql<number>`coalesce(sum(case when ${recording.status} in ('completed','processing') then ${recording.durationMs} else 0 end), 0)`,
-          totalFileSize: sql<number>`coalesce(sum(case when ${recording.status} in ('completed','processing') then ${recording.fileSize} else 0 end), 0)`,
+          totalDurationMs: sql<number>`coalesce(sum(case when ${recording.status} = 'completed' then ${recording.durationMs} else 0 end), 0)`,
+          totalFileSize: sql<number>`coalesce(sum(case when ${recording.status} = 'completed' then ${recording.fileSize} else 0 end), 0)`,
           uploading: sql<number>`coalesce(sum(case when ${recording.status} = 'uploading' then 1 else 0 end), 0)`,
           processing: sql<number>`coalesce(sum(case when ${recording.status} = 'processing' then 1 else 0 end), 0)`,
           completed: sql<number>`coalesce(sum(case when ${recording.status} = 'completed' then 1 else 0 end), 0)`,
+          unoptimized: sql<number>`coalesce(sum(case when ${recording.status} = 'unoptimized' then 1 else 0 end), 0)`,
           failed: sql<number>`coalesce(sum(case when ${recording.status} = 'failed' then 1 else 0 end), 0)`,
         })
         .from(recording)
@@ -106,6 +107,7 @@ export function createRecordingRepository(d1: D1Database) {
           uploading: row?.uploading ?? 0,
           processing: row?.processing ?? 0,
           completed: row?.completed ?? 0,
+          unoptimized: row?.unoptimized ?? 0,
           failed: row?.failed ?? 0,
         },
       };
@@ -115,7 +117,7 @@ export function createRecordingRepository(d1: D1Database) {
       id: string,
       organizationId: string,
       data: {
-        status: "processing" | "completed" | "failed";
+        status: "processing" | "completed" | "unoptimized" | "failed";
         fileSize?: number;
         durationMs?: number;
         completedAt?: Date;

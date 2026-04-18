@@ -69,18 +69,18 @@ async function handleVideoProcessingMessage(
       console.error(
         `Video processing failed for ${recordingId}: ${errorMessage}`,
       );
-      // 変換失敗時は completed にして fMP4 のまま配信
+      // 最適化失敗: unoptimized にして再生不可扱いとする
       await repo.updateStatus(recordingId, organizationId, {
-        status: "completed",
+        status: "unoptimized",
         completedAt: new Date(),
       });
     }
   } catch (err) {
     errorMessage = err instanceof Error ? err.message : String(err);
     console.error(`Video processing error for ${recordingId}:`, err);
-    // エラー時も completed にして fMP4 のまま配信
+    // 最適化失敗: unoptimized にして再生不可扱いとする
     await repo.updateStatus(recordingId, organizationId, {
-      status: "completed",
+      status: "unoptimized",
       completedAt: new Date(),
     });
   }
@@ -127,8 +127,8 @@ async function handleVideoProcessingMessage(
     );
   }
 
-  // 動画変換完了後に文字起こしジョブをエンキュー
-  if (env.SKIP_TRANSCRIPTION !== "true") {
+  // 動画変換完了後に文字起こしジョブをエンキュー（Lambda 失敗時はスキップ）
+  if (lambdaSucceeded && env.SKIP_TRANSCRIPTION !== "true") {
     try {
       const transcriptionRepo = createTranscriptionRepository(env.DB);
 

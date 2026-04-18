@@ -14,7 +14,7 @@ export const recording = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     status: text("status", {
-      enum: ["uploading", "processing", "completed", "failed"],
+      enum: ["uploading", "processing", "completed", "unoptimized", "failed"],
     })
       .default("uploading")
       .notNull(),

@@ -12,7 +12,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@torea/ui/components/ui/alert-dialog";
-import { Badge } from "@torea/ui/components/ui/badge";
 import { Button, buttonVariants } from "@torea/ui/components/ui/button";
 import { Separator } from "@torea/ui/components/ui/separator";
 import { DownloadIcon, EyeIcon, Trash2Icon, UsersIcon } from "lucide-react";
@@ -54,27 +53,20 @@ export function RecordingDetailView({
     setIsDeleting(false);
   }
 
+  const unavailableMessage = getUnavailableMessage(recording.status);
+
   return (
     <div className="space-y-6">
       {/* ビデオプレーヤー */}
-      {recording.status === "completed" || recording.status === "processing" ? (
-        <div className="space-y-2">
-          {recording.status === "processing" && (
-            <Badge variant="secondary">最適化中 — 再生は可能です</Badge>
-          )}
-          <VideoPlayer
-            ref={playerRef}
-            recordingId={recording.id}
-            mimeType={recording.mimeType}
-          />
-        </div>
+      {recording.status === "completed" ? (
+        <VideoPlayer
+          ref={playerRef}
+          recordingId={recording.id}
+          mimeType={recording.mimeType}
+        />
       ) : (
         <div className="flex aspect-video items-center justify-center rounded-lg border border-dashed bg-muted/50">
-          <p className="text-muted-foreground text-sm">
-            {recording.status === "uploading"
-              ? "この録画はまだアップロード中です"
-              : "この録画は利用できません"}
-          </p>
+          <p className="text-muted-foreground text-sm">{unavailableMessage}</p>
         </div>
       )}
 
@@ -127,8 +119,7 @@ export function RecordingDetailView({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-          {(recording.status === "completed" ||
-            recording.status === "processing") && (
+          {recording.status === "completed" && (
             <>
               <a
                 href={`${env.NEXT_PUBLIC_SERVER_URL}/api/recordings/${recording.id}/download`}
@@ -172,9 +163,8 @@ export function RecordingDetailView({
         </div>
       </div>
 
-      {/* サムネイル自動生成（completed/processing かつ未生成の場合） */}
-      {(recording.status === "completed" ||
-        recording.status === "processing") && (
+      {/* サムネイル自動生成（completed かつ未生成の場合） */}
+      {recording.status === "completed" && (
         <ThumbnailGenerator
           recordingId={recording.id}
           mimeType={recording.mimeType}
@@ -182,9 +172,8 @@ export function RecordingDetailView({
         />
       )}
 
-      {/* コメントセクション（completed/processing の場合） */}
-      {(recording.status === "completed" ||
-        recording.status === "processing") && (
+      {/* コメントセクション（completed の場合） */}
+      {recording.status === "completed" && (
         <CommentSection
           recordingId={recording.id}
           comments={comments}
@@ -193,11 +182,21 @@ export function RecordingDetailView({
         />
       )}
 
-      {/* 文字起こしセクション（completed/processing の場合） */}
-      {(recording.status === "completed" ||
-        recording.status === "processing") && (
+      {/* 文字起こしセクション（completed の場合） */}
+      {recording.status === "completed" && (
         <TranscriptionPanel recordingId={recording.id} playerRef={playerRef} />
       )}
     </div>
   );
+}
+
+function getUnavailableMessage(status: Recording["status"]): string {
+  switch (status) {
+    case "uploading":
+      return "動画をアップロード中です";
+    case "processing":
+      return "動画を準備しています";
+    default:
+      return "動画を再生できません";
+  }
 }

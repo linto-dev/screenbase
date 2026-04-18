@@ -31,8 +31,9 @@ import type { Recording } from "../../../_lib/types";
 
 const statusConfig = {
   completed: { label: "完了", variant: "default" as const },
-  processing: { label: "最適化中", variant: "secondary" as const },
+  processing: { label: "準備中", variant: "secondary" as const },
   uploading: { label: "アップロード中", variant: "secondary" as const },
+  unoptimized: { label: "再生不可", variant: "destructive" as const },
   failed: { label: "失敗", variant: "destructive" as const },
 };
 
@@ -68,8 +69,7 @@ export function RecordingRow({ recording, selected, onToggleSelect }: Props) {
         />
       </TableCell>
       <TableCell className="max-w-xs">
-        {recording.status === "completed" ||
-        recording.status === "processing" ? (
+        {recording.status === "completed" ? (
           <Link
             href={`/dashboard/recordings/${recording.id}`}
             className="block truncate font-medium hover:underline"
@@ -111,8 +111,7 @@ export function RecordingRow({ recording, selected, onToggleSelect }: Props) {
             <span className="sr-only">操作メニュー</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {(recording.status === "completed" ||
-              recording.status === "processing") && (
+            {recording.status === "completed" && (
               <DropdownMenuItem
                 render={<Link href={`/dashboard/recordings/${recording.id}`} />}
               >

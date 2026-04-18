@@ -275,8 +275,12 @@ export function createRecordingService({
         }
       }
 
-      // completed or processing ならオブジェクト削除
-      if (rec.status === "completed" || rec.status === "processing") {
+      // R2 にオブジェクトがある状態 (completed/processing/unoptimized) なら削除
+      if (
+        rec.status === "completed" ||
+        rec.status === "processing" ||
+        rec.status === "unoptimized"
+      ) {
         await storage.delete(rec.r2Key);
       }
 
@@ -323,10 +327,13 @@ export function createRecordingService({
         }
       }
 
-      // completed/processing のレコードの R2 キーを収集して一括削除
+      // R2 にオブジェクトがある状態のレコードの R2 キーを収集して一括削除
       const keysToDelete = records
         .filter(
-          (rec) => rec.status === "completed" || rec.status === "processing",
+          (rec) =>
+            rec.status === "completed" ||
+            rec.status === "processing" ||
+            rec.status === "unoptimized",
         )
         .map((rec) => rec.r2Key);
 

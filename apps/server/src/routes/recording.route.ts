@@ -273,8 +273,8 @@ export const recordingRoute = new Hono<AppEnv>()
     if (!rec) {
       return c.json({ error: "Recording not found" }, 404);
     }
-    if (rec.status !== "completed" && rec.status !== "processing") {
-      return c.json({ error: "Recording is not ready for playback" }, 400);
+    if (rec.status !== "completed") {
+      return c.json({ error: "Recording is not available" }, 400);
     }
 
     const storage = new R2StorageClient(c.env.R2);
@@ -367,8 +367,8 @@ export const recordingRoute = new Hono<AppEnv>()
     if (!rec) {
       return c.json({ error: "Recording not found" }, 404);
     }
-    if (rec.status !== "completed" && rec.status !== "processing") {
-      return c.json({ error: "Recording is not ready for download" }, 400);
+    if (rec.status !== "completed") {
+      return c.json({ error: "Recording is not available" }, 400);
     }
 
     const storage = new R2StorageClient(c.env.R2);
