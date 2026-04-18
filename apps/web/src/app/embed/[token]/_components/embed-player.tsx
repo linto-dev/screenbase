@@ -1,24 +1,16 @@
 "use client";
 
 import { env } from "@torea/env/web";
+import { VideoPlayer as SharedVideoPlayer } from "@torea/ui/components/blocks/video-player";
 import { LoaderCircleIcon } from "lucide-react";
 import {
-  MediaControlBar,
-  MediaController,
-  MediaFullscreenButton,
   MediaMuteButton,
   MediaPlayButton,
   MediaTimeDisplay,
   MediaTimeRange,
   MediaVolumeRange,
 } from "media-chrome/react";
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, useRef } from "react";
 
 const embedMediaVariables = {
   "--media-primary-color": "#fff",
@@ -30,6 +22,12 @@ const embedMediaVariables = {
   "--media-range-track-background": "rgba(255, 255, 255, 0.3)",
 } as CSSProperties;
 
+const embedLoadingOverlay = (
+  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
+    <LoaderCircleIcon className="size-8 animate-spin text-white/40" />
+  </div>
+);
+
 type Props = {
   token: string;
   mimeType: string;
@@ -40,36 +38,6 @@ type Props = {
 export function EmbedPlayer({ token, mimeType, onAccessDenied }: Props) {
   const videoUrl = `${env.NEXT_PUBLIC_SERVER_URL}/api/share/${encodeURIComponent(token)}/stream`;
   const hasTrackedRef = useRef(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // クライアントマウント後に動画ソースを設定する。
-  // SSR 時に <source src> を出力すると、ページロード時に即座にリクエストが始まり
-  // 大きなファイル（1GB+）ではタブのローディング状態が長時間続く。
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    setIsLoading(true);
-
-    const source = document.createElement("source");
-    source.src = videoUrl;
-    source.type = mimeType;
-    video.appendChild(source);
-    video.load();
-
-    return () => {
-      video.removeChild(source);
-    };
-  }, [videoUrl, mimeType]);
-
-  const handleLoadedMetadata = useCallback(() => {
-    setIsLoading(false);
-  }, []);
-
-  const handleError = useCallback(() => {
-    setIsLoading(false);
-    onAccessDenied?.();
-  }, [onAccessDenied]);
 
   /**
    * 動画再生開始時に視聴イベントを記録する。
@@ -94,36 +62,21 @@ export function EmbedPlayer({ token, mimeType, onAccessDenied }: Props) {
   }
 
   return (
-    <div className="relative h-full w-full">
-      {isLoading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-          <LoaderCircleIcon className="size-8 animate-spin text-white/40" />
-        </div>
-      )}
-
-      <MediaController style={embedMediaVariables} className="h-full w-full">
-        {/* biome-ignore lint/a11y/useMediaCaption: screen recordings don't have captions */}
-        <video
-          ref={videoRef}
-          slot="media"
-          preload="metadata"
-          crossOrigin="use-credentials"
-          playsInline
-          className="mt-0 mb-0"
-          tabIndex={-1}
-          onLoadedMetadata={handleLoadedMetadata}
-          onError={handleError}
-          onPlay={handlePlay}
-        />
-        <MediaControlBar>
-          <MediaPlayButton className="p-2.5" />
-          <MediaTimeRange className="p-2.5" />
-          <MediaTimeDisplay className="p-2.5" showDuration />
-          <MediaMuteButton className="p-2.5" />
-          <MediaVolumeRange className="p-2.5" />
-          <MediaFullscreenButton className="p-2.5" />
-        </MediaControlBar>
-      </MediaController>
-    </div>
+    <SharedVideoPlayer
+      src={videoUrl}
+      mimeType={mimeType}
+      mediaVariables={embedMediaVariables}
+      className="h-full w-full"
+      controllerClassName="h-full w-full"
+      loadingOverlay={embedLoadingOverlay}
+      onPlay={handlePlay}
+      onError={onAccessDenied}
+    >
+      <MediaPlayButton className="p-2.5" />
+      <MediaTimeRange className="p-2.5" />
+      <MediaTimeDisplay className="p-2.5" showDuration />
+      <MediaMuteButton className="p-2.5" />
+      <MediaVolumeRange className="hidden p-2.5 sm:inline-flex" />
+    </SharedVideoPlayer>
   );
 }

@@ -448,6 +448,9 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 0.546.0(react@19.2.4)
+      media-chrome:
+        specifier: ^4.18.3
+        version: 4.18.3(react@19.2.4)
       next-themes:
         specifier: 'catalog:'
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

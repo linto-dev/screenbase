@@ -79,31 +79,45 @@ export function RecordingDetailView({
       )}
 
       {/* メタデータ & アクション */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="font-semibold text-xl">{recording.title}</h2>
-          <div className="flex items-center gap-3 text-muted-foreground text-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div className="min-w-0 space-y-1">
+          <h2 className="break-words font-semibold text-xl">
+            {recording.title}
+          </h2>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-sm">
             <span>{formatDateTime(recording.createdAt)}</span>
             {recording.durationMs !== null && (
               <>
-                <Separator orientation="vertical" className="h-4" />
+                <Separator
+                  orientation="vertical"
+                  className="hidden h-4 sm:block"
+                />
                 <span>{formatDuration(recording.durationMs)}</span>
               </>
             )}
             {recording.fileSize !== null && (
               <>
-                <Separator orientation="vertical" className="h-4" />
+                <Separator
+                  orientation="vertical"
+                  className="hidden h-4 sm:block"
+                />
                 <span>{formatFileSize(recording.fileSize)}</span>
               </>
             )}
             {stats && (
               <>
-                <Separator orientation="vertical" className="h-4" />
+                <Separator
+                  orientation="vertical"
+                  className="hidden h-4 sm:block"
+                />
                 <span className="inline-flex items-center gap-1">
                   <EyeIcon className="size-3.5" />
                   {stats.totalViews.toLocaleString()}
                 </span>
-                <Separator orientation="vertical" className="h-4" />
+                <Separator
+                  orientation="vertical"
+                  className="hidden h-4 sm:block"
+                />
                 <span className="inline-flex items-center gap-1">
                   <UsersIcon className="size-3.5" />
                   {stats.uniqueViewers.toLocaleString()}
@@ -112,7 +126,7 @@ export function RecordingDetailView({
             )}
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           {(recording.status === "completed" ||
             recording.status === "processing") && (
             <>
