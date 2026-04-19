@@ -25,11 +25,10 @@ if (!process.env.ALCHEMY_DEPLOY) {
   config({ path: "../../.env.local" });
 }
 
-// USE_REMOTE_BINDINGS=true でローカル開発時もリモートの D1/R2/KV/Queue を使用
-const useRemoteBindings = process.env.USE_REMOTE_BINDINGS === "true";
+const stage = process.env.ALCHEMY_STAGE ?? "dev";
 
 const app = await alchemy("torea", {
-  stage: process.env.ALCHEMY_STAGE ?? "dev",
+  stage,
   password: process.env.ALCHEMY_PASSWORD,
   // deploy/CI ではリモート state、dev ではローカルファイルシステム state
   ...(process.env.ALCHEMY_DEPLOY
@@ -45,34 +44,30 @@ const app = await alchemy("torea", {
 
 const db = await D1Database("database", {
   migrationsDir: "../../packages/db/src/migrations",
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
 });
 
 const r2 = await R2Bucket("torea-storage", {
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
+  name: `torea-storage-${stage}`,
 });
 
 const kv = await KVNamespace("torea-kv", {
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
+  title: `torea-kv-${stage}`,
 });
 
 const videoProcessingQueue = await Queue("video-processing-queue", {
-  name: "torea-video-processing",
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
+  name: `torea-video-processing-${stage}`,
 });
 
 const transcriptionQueue = await Queue("transcription-queue", {
-  name: "torea-transcription",
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
+  name: `torea-transcription-${stage}`,
 });
 
 const webhookDeliveryQueue = await Queue("webhook-delivery-queue", {
-  name: "torea-webhook-delivery",
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
+  name: `torea-webhook-delivery-${stage}`,
 });
 
 const webhookSecretKv = await KVNamespace("torea-webhook-secrets", {
-  ...(useRemoteBindings ? { dev: { remote: true } } : {}),
+  title: `torea-webhook-secrets-${stage}`,
 });
 
 export const web = await Nextjs("web", {
