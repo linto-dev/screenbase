@@ -34,11 +34,6 @@ type QueueMessage =
   | TranscriptionMessage
   | WebhookDeliveryMessage;
 
-// alchemy.run.ts の Queue({ name: ... }) と一致させる
-const QUEUE_VIDEO_PROCESSING = "torea-video-processing";
-const QUEUE_TRANSCRIPTION = "torea-transcription";
-const QUEUE_WEBHOOK_DELIVERY = "torea-webhook-delivery";
-
 async function handleVideoProcessingMessage(
   body: VideoProcessingMessage,
   env: AppEnv["Bindings"],
@@ -320,33 +315,35 @@ export default {
     // Cloudflare Queues は同一 Worker に複数 Queue をバインドできる。
     // `batch.queue` (送信元キュー名) でディスパッチするのが公式推奨パターン。
     // https://developers.cloudflare.com/queues/reference/how-queues-works/#queues-consumers
+    // キュー名は stage サフィックス込み (例: torea-video-processing-prod) で来るため、
+    // alchemy.run.ts でリソースから解決した実名を bindings 経由で参照する。
     for (const msg of batch.messages) {
       try {
-        switch (batch.queue) {
-          case QUEUE_TRANSCRIPTION:
-            await handleTranscriptionMessage(
-              msg.body as TranscriptionMessage,
-              env,
-              aws,
-              transcriptionRepo,
-            );
-            break;
-          case QUEUE_WEBHOOK_DELIVERY:
-            await handleWebhookDeliveryMessage(
-              msg.body as WebhookDeliveryMessage,
-              env,
-            );
-            break;
-          case QUEUE_VIDEO_PROCESSING:
-            await handleVideoProcessingMessage(
-              msg.body as VideoProcessingMessage,
-              env,
-              aws,
-              recordingRepo,
-            );
-            break;
-          default:
-            console.error(`Unknown queue: ${batch.queue}`);
+        if (batch.queue === env.VIDEO_PROCESSING_QUEUE_NAME) {
+          await handleVideoProcessingMessage(
+            msg.body as VideoProcessingMessage,
+            env,
+            aws,
+            recordingRepo,
+          );
+        } else if (batch.queue === env.TRANSCRIPTION_QUEUE_NAME) {
+          await handleTranscriptionMessage(
+            msg.body as TranscriptionMessage,
+            env,
+            aws,
+            transcriptionRepo,
+          );
+        } else if (batch.queue === env.WEBHOOK_DELIVERY_QUEUE_NAME) {
+          await handleWebhookDeliveryMessage(
+            msg.body as WebhookDeliveryMessage,
+            env,
+          );
+        } else {
+          // 未知のキュー: ack せず retry させ、可視化する。
+          // バインディング設定ミスや stage 解決バグの早期検知用。
+          console.error(`Unknown queue: ${batch.queue}`);
+          msg.retry();
+          continue;
         }
       } catch (err) {
         // webhook-delivery は runner 内で retry / dead 化を管理するため ack でよい。

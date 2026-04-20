@@ -106,6 +106,12 @@ export const server = await Worker("server", {
     VIDEO_PROCESSING_QUEUE: videoProcessingQueue,
     TRANSCRIPTION_QUEUE: transcriptionQueue,
     WEBHOOK_DELIVERY_QUEUE: webhookDeliveryQueue,
+    // Queue consumer の dispatch 用に実名を注入する。
+    // `batch.queue` は stage サフィックス込みのフル名 (例: torea-video-processing-prod) を返すため、
+    // Worker 側でハードコードせずバインディング経由で比較する。
+    VIDEO_PROCESSING_QUEUE_NAME: videoProcessingQueue.name,
+    TRANSCRIPTION_QUEUE_NAME: transcriptionQueue.name,
+    WEBHOOK_DELIVERY_QUEUE_NAME: webhookDeliveryQueue.name,
     WEBHOOK_SECRET_KV: webhookSecretKv,
     // AWS Lambda（動画変換処理）
     LAMBDA_FUNCTION_URL: alchemy.env.LAMBDA_FUNCTION_URL!,

@@ -17,6 +17,9 @@ export type AppEnv = {
       deliveryId: string;
       organizationId: string;
     }>;
+    VIDEO_PROCESSING_QUEUE_NAME: string;
+    TRANSCRIPTION_QUEUE_NAME: string;
+    WEBHOOK_DELIVERY_QUEUE_NAME: string;
     WEBHOOK_SECRET_KV: KVNamespace;
     LAMBDA_FUNCTION_URL: string;
     LAMBDA_REGION: string;
